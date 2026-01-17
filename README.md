@@ -23,17 +23,17 @@ npm install simple-azure-storage
 ## Quick Start
 
 ```typescript
-import { SimpleBlobClient } from 'simple-azure-storage';
+import { SimpleBlobClient } from "simple-azure-storage";
 
 // Using connection string
 const client = new SimpleBlobClient(
-  'DefaultEndpointsProtocol=https;AccountName=...;AccountKey=...;EndpointSuffix=core.windows.net',
-  'my-container'
+  "DefaultEndpointsProtocol=https;AccountName=...;AccountKey=...;EndpointSuffix=core.windows.net",
+  "my-container",
 );
 
 // Upload and download in one line
-await client.uploadFromString('hello.txt', 'Hello World!');
-const content = await client.downloadAsString('hello.txt');
+await client.uploadFromString("hello.txt", "Hello World!");
+const content = await client.downloadAsString("hello.txt");
 console.log(content); // "Hello World!"
 ```
 
@@ -43,8 +43,8 @@ console.log(content); // "Hello World!"
 
 ```typescript
 const client = new SimpleBlobClient(
-  'DefaultEndpointsProtocol=https;AccountName=myaccount;AccountKey=...;EndpointSuffix=core.windows.net',
-  'my-container'
+  "DefaultEndpointsProtocol=https;AccountName=myaccount;AccountKey=...;EndpointSuffix=core.windows.net",
+  "my-container",
 );
 ```
 
@@ -52,7 +52,7 @@ const client = new SimpleBlobClient(
 
 ```typescript
 // Uses DefaultAzureCredential - automatically detects environment
-const client = new SimpleBlobClient('myaccount', 'my-container');
+const client = new SimpleBlobClient("myaccount", "my-container");
 ```
 
 ### Custom Credentials
@@ -60,21 +60,25 @@ const client = new SimpleBlobClient('myaccount', 'my-container');
 #### Azure AD (Service Principal)
 
 ```typescript
-import { ClientSecretCredential } from '@azure/identity';
+import { ClientSecretCredential } from "@azure/identity";
 
-const credential = new ClientSecretCredential('tenant-id', 'client-id', 'client-secret');
+const credential = new ClientSecretCredential(
+  "tenant-id",
+  "client-id",
+  "client-secret",
+);
 
-const client = new SimpleBlobClient('myaccount', 'my-container', credential);
+const client = new SimpleBlobClient("myaccount", "my-container", credential);
 ```
 
 #### Account Key (StorageSharedKeyCredential)
 
 ```typescript
-import { StorageSharedKeyCredential } from '@azure/storage-blob';
+import { StorageSharedKeyCredential } from "@azure/storage-blob";
 
-const credential = new StorageSharedKeyCredential('myaccount', 'accountKey...');
+const credential = new StorageSharedKeyCredential("myaccount", "accountKey...");
 
-const client = new SimpleBlobClient('myaccount', 'my-container', credential);
+const client = new SimpleBlobClient("myaccount", "my-container", credential);
 ```
 
 ### SAS URL (Shared Access Signature)
@@ -82,15 +86,15 @@ const client = new SimpleBlobClient('myaccount', 'my-container', credential);
 ```typescript
 // Account-level SAS URL from Azure Portal or generated programmatically
 const client = new SimpleBlobClient(
-  'https://myaccount.blob.core.windows.net?sv=2021-08-06&ss=b&srt=sco&sp=rwdlacx&sig=...',
-  'my-container'
+  "https://myaccount.blob.core.windows.net?sv=2021-08-06&ss=b&srt=sco&sp=rwdlacx&sig=...",
+  "my-container",
 );
 
 // Container-level SAS URL (URL already includes container path)
 // Useful when you have a SAS token scoped to a specific container
 const client = new SimpleBlobClient(
-  'https://myaccount.blob.core.windows.net/my-container?sv=2021-08-06&sr=c&sp=rwdl&sig=...',
-  'my-container'
+  "https://myaccount.blob.core.windows.net/my-container?sv=2021-08-06&sr=c&sp=rwdl&sig=...",
+  "my-container",
 );
 
 // Note: This wrapper operates at the container level
@@ -100,30 +104,37 @@ const client = new SimpleBlobClient(
 ### Account URL with Credential
 
 ```typescript
-import { ClientSecretCredential } from '@azure/identity';
+import { ClientSecretCredential } from "@azure/identity";
 
-const credential = new ClientSecretCredential('tenant-id', 'client-id', 'client-secret');
+const credential = new ClientSecretCredential(
+  "tenant-id",
+  "client-id",
+  "client-secret",
+);
 
 // Using full account URL
 const client = new SimpleBlobClient(
-  'https://myaccount.blob.core.windows.net',
-  'my-container',
-  credential
+  "https://myaccount.blob.core.windows.net",
+  "my-container",
+  credential,
 );
 ```
 
 ### Development (Azurite)
 
 ```typescript
-const client = new SimpleBlobClient('UseDevelopmentStorage=true', 'my-container');
+const client = new SimpleBlobClient(
+  "UseDevelopmentStorage=true",
+  "my-container",
+);
 ```
 
 For Azurite path-style endpoints:
 
 ```typescript
 const client = new SimpleBlobClient(
-  'http://127.0.0.1:10000/devstoreaccount1',
-  'my-container'
+  "http://127.0.0.1:10000/devstoreaccount1",
+  "my-container",
 );
 ```
 
@@ -131,9 +142,9 @@ If you need path-style endpoints on non-local hosts (e.g., Azure Stack), pass:
 
 ```typescript
 const client = new SimpleBlobClient(
-  'https://my-azure-stack.example.com/account/container',
-  'container',
-  { allowPathStyleEndpoints: true }
+  "https://my-azure-stack.example.com/account/container",
+  "container",
+  { allowPathStyleEndpoints: true },
 );
 ```
 
@@ -146,10 +157,10 @@ const client = new SimpleBlobClient(
 Upload a string to a blob.
 
 ```typescript
-await client.uploadFromString('notes.txt', 'Hello World', {
-  contentType: 'text/plain',
-  metadata: { author: 'John' },
-  tags: { env: 'prod' },
+await client.uploadFromString("notes.txt", "Hello World", {
+  contentType: "text/plain",
+  metadata: { author: "John" },
+  tags: { env: "prod" },
   overwrite: false, // Fail if blob exists
 });
 ```
@@ -159,9 +170,9 @@ await client.uploadFromString('notes.txt', 'Hello World', {
 Upload a Buffer to a blob.
 
 ```typescript
-const buffer = Buffer.from('binary data');
-await client.uploadFromBuffer('data.bin', buffer, {
-  contentType: 'application/octet-stream',
+const buffer = Buffer.from("binary data");
+await client.uploadFromBuffer("data.bin", buffer, {
+  contentType: "application/octet-stream",
 });
 ```
 
@@ -170,7 +181,7 @@ await client.uploadFromBuffer('data.bin', buffer, {
 Upload a file from the filesystem.
 
 ```typescript
-await client.uploadFromFile('documents/report.pdf', './local/report.pdf', {
+await client.uploadFromFile("documents/report.pdf", "./local/report.pdf", {
   onProgress: (event) => {
     console.log(`Progress: ${event.percentComplete}%`);
   },
@@ -182,8 +193,8 @@ await client.uploadFromFile('documents/report.pdf', './local/report.pdf', {
 Serialize and upload JSON data.
 
 ```typescript
-await client.uploadJson('config.json', {
-  apiUrl: 'https://api.example.com',
+await client.uploadJson("config.json", {
+  apiUrl: "https://api.example.com",
   timeout: 5000,
 });
 ```
@@ -195,8 +206,8 @@ await client.uploadJson('config.json', {
 Download a blob as a string.
 
 ```typescript
-const text = await client.downloadAsString('notes.txt');
-const utf16 = await client.downloadAsString('data.txt', 'utf16le');
+const text = await client.downloadAsString("notes.txt");
+const utf16 = await client.downloadAsString("data.txt", "utf16le");
 ```
 
 #### `downloadAsBuffer(blobName, options?)`
@@ -204,7 +215,7 @@ const utf16 = await client.downloadAsString('data.txt', 'utf16le');
 Download a blob as a Buffer.
 
 ```typescript
-const buffer = await client.downloadAsBuffer('image.png', {
+const buffer = await client.downloadAsBuffer("image.png", {
   onProgress: (event) => {
     console.log(`Downloaded: ${event.loadedBytes} bytes`);
   },
@@ -216,7 +227,7 @@ const buffer = await client.downloadAsBuffer('image.png', {
 Download a blob directly to a file.
 
 ```typescript
-await client.downloadToFile('backup.zip', './downloads/backup.zip', {
+await client.downloadToFile("backup.zip", "./downloads/backup.zip", {
   range: { start: 0, end: 1023 }, // Download first 1KB
 });
 ```
@@ -231,7 +242,7 @@ interface Config {
   timeout: number;
 }
 
-const config = await client.downloadAsJson<Config>('config.json');
+const config = await client.downloadAsJson<Config>("config.json");
 console.log(config.apiUrl);
 ```
 
@@ -242,8 +253,8 @@ console.log(config.apiUrl);
 Check if a blob exists.
 
 ```typescript
-if (await client.exists('config.json')) {
-  console.log('Config file found');
+if (await client.exists("config.json")) {
+  console.log("Config file found");
 }
 ```
 
@@ -252,7 +263,7 @@ if (await client.exists('config.json')) {
 Delete a blob.
 
 ```typescript
-await client.delete('old-file.txt');
+await client.delete("old-file.txt");
 ```
 
 #### `list(prefix?, maxResults?)`
@@ -264,7 +275,7 @@ List blobs in the container.
 const allBlobs = await client.list();
 
 // List blobs in a folder
-const documents = await client.list('documents/');
+const documents = await client.list("documents/");
 
 // Get first 10 blobs
 const firstTen = await client.list(undefined, 10);
@@ -279,7 +290,7 @@ allBlobs.forEach((blob) => {
 Get blob metadata and properties.
 
 ```typescript
-const metadata = await client.getMetadata('document.pdf', {
+const metadata = await client.getMetadata("document.pdf", {
   includeTags: true, // Optional, default false
 });
 
@@ -294,10 +305,10 @@ console.log(metadata.tags); // Blob index tags (if includeTags: true)
 Update blob metadata.
 
 ```typescript
-await client.setMetadata('document.pdf', {
-  author: 'Jane Doe',
-  version: '2.0',
-  reviewed: 'true',
+await client.setMetadata("document.pdf", {
+  author: "Jane Doe",
+  version: "2.0",
+  reviewed: "true",
 });
 ```
 
@@ -308,7 +319,7 @@ Get the underlying Azure SDK ContainerClient for advanced operations.
 ```typescript
 const containerClient = client.getContainerClient();
 // Use for operations not covered by SimpleBlobClient
-await containerClient.setAccessPolicy('blob');
+await containerClient.setAccessPolicy("blob");
 ```
 
 ## Upload Options
@@ -344,19 +355,19 @@ import {
   BlobUploadError,
   BlobDownloadError,
   ContainerOperationError,
-} from 'simple-azure-storage';
+} from "simple-azure-storage";
 
 try {
-  await client.downloadAsString('missing.txt');
+  await client.downloadAsString("missing.txt");
 } catch (error) {
   if (error instanceof BlobNotFoundError) {
     console.log(`Blob not found: ${error.blobName}`);
   } else if (error instanceof ContainerNotFoundError) {
     console.log(`Container not found: ${error.containerName}`);
   } else if (error instanceof AuthenticationError) {
-    console.log('Authentication failed');
+    console.log("Authentication failed");
   } else {
-    console.log('Unknown error:', error);
+    console.log("Unknown error:", error);
   }
 }
 ```
@@ -368,7 +379,7 @@ interface SimpleBlobClientOptions {
   createContainerIfNotExists?: boolean; // Auto-create container on upload
 }
 
-const client = new SimpleBlobClient(connectionString, 'my-container', {
+const client = new SimpleBlobClient(connectionString, "my-container", {
   createContainerIfNotExists: true,
 });
 ```
@@ -378,7 +389,7 @@ const client = new SimpleBlobClient(connectionString, 'my-container', {
 ### Upload Multiple Files
 
 ```typescript
-const files = ['doc1.txt', 'doc2.txt', 'doc3.txt'];
+const files = ["doc1.txt", "doc2.txt", "doc3.txt"];
 
 for (const file of files) {
   await client.uploadFromFile(`backup/${file}`, `./local/${file}`, {
@@ -392,12 +403,12 @@ for (const file of files) {
 ```typescript
 // Only upload if blob doesn't exist
 try {
-  await client.uploadFromString('data.txt', 'content', {
+  await client.uploadFromString("data.txt", "content", {
     overwrite: false,
   });
 } catch (error) {
-  if (error.message.includes('BlobAlreadyExists')) {
-    console.log('File already exists, skipping upload');
+  if (error.message.includes("BlobAlreadyExists")) {
+    console.log("File already exists, skipping upload");
   }
 }
 ```
@@ -405,10 +416,13 @@ try {
 ### List and Download
 
 ```typescript
-const blobs = await client.list('reports/2024/');
+const blobs = await client.list("reports/2024/");
 
 for (const blob of blobs) {
-  await client.downloadToFile(blob.name, `./downloads/${blob.name.split('/').pop()}`);
+  await client.downloadToFile(
+    blob.name,
+    `./downloads/${blob.name.split("/").pop()}`,
+  );
 }
 ```
 
@@ -490,52 +504,9 @@ git push --follow-tags
 
 Pushing a tag like `v1.2.3` triggers the GitHub Actions workflow to publish to npm.
 
-## Espanol
+## Documentation
 
-A continuacion se encuentra una version breve en espanol para referencia rapida. Para npm, la seccion en ingles es la principal.
-
-Nota: esta seccion esta escrita en ASCII a proposito para mantener compatibilidad amplia.
-
-### Instalacion
-
-```bash
-npm install simple-azure-storage
-```
-
-### Inicio rapido
-
-```typescript
-import { SimpleBlobClient } from 'simple-azure-storage';
-
-const client = new SimpleBlobClient(
-  'DefaultEndpointsProtocol=https;AccountName=...;AccountKey=...;EndpointSuffix=core.windows.net',
-  'mi-contenedor'
-);
-
-await client.uploadFromString('hola.txt', 'Hola mundo');
-const contenido = await client.downloadAsString('hola.txt');
-console.log(contenido);
-```
-
-### Autenticacion
-
-- Cadena de conexion: `new SimpleBlobClient(connectionString, containerName)`
-- Identidad administrada: `new SimpleBlobClient(accountName, containerName)`
-- Credencial personalizada: `new SimpleBlobClient(accountName, containerName, credential)`
-
-### Manejo de errores
-
-```typescript
-import { BlobNotFoundError } from 'simple-azure-storage';
-
-try {
-  await client.downloadAsString('missing.txt');
-} catch (error) {
-  if (error instanceof BlobNotFoundError) {
-    console.log('Blob no encontrado');
-  }
-}
-```
+- Espanol: [docs/README.es.md](docs/README.es.md)
 
 ## Troubleshooting
 
@@ -544,7 +515,7 @@ try {
 Enable auto-creation:
 
 ```typescript
-const client = new SimpleBlobClient(connectionString, 'my-container', {
+const client = new SimpleBlobClient(connectionString, "my-container", {
   createContainerIfNotExists: true,
 });
 ```
@@ -554,7 +525,7 @@ const client = new SimpleBlobClient(connectionString, 'my-container', {
 Pass `includeTags: false` when calling `getMetadata()`:
 
 ```typescript
-const metadata = await client.getMetadata('file.txt', { includeTags: false });
+const metadata = await client.getMetadata("file.txt", { includeTags: false });
 ```
 
 ### Authentication fails with DefaultAzureCredential
