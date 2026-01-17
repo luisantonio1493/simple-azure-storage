@@ -1,0 +1,74 @@
+{
+  "name": "simple-azure-storage",
+  "version": "0.1.0",
+  "description": "Simplified wrapper for Azure Blob Storage operations",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
+    }
+  },
+  "scripts": {
+    "clean": "rimraf dist",
+    "build": "npm run clean && npm run build:esm && npm run build:cjs && npm run build:types",
+    "build:esm": "tsc -p tsconfig.esm.json && node ./write-esm-package-json.js",
+    "build:cjs": "tsc -p tsconfig.cjs.json",
+    "build:types": "tsc -p tsconfig.types.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:integration": "vitest run tests/integration",
+    "lint": "eslint src --ext .ts",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "keywords": [
+    "azure",
+    "blob",
+    "blob-storage",
+    "storage",
+    "azure-storage",
+    "cloud-storage",
+    "wrapper",
+    "typescript"
+  ],
+  "author": "Luis Antonio",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/luisantonio1493/simple-azure-storage.git"
+  },
+  "bugs": {
+    "url": "https://github.com/luisantonio1493/simple-azure-storage/issues"
+  },
+  "homepage": "https://github.com/luisantonio1493/simple-azure-storage#readme",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@azure/storage-blob": "^12.17.0",
+    "@azure/identity": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^1.0.0",
+    "azurite": "^3.28.0",
+    "prettier": "^3.0.0",
+    "eslint": "^8.0.0",
+    "rimraf": "^5.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
