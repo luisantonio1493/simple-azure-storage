@@ -1,6 +1,6 @@
 {
   "name": "simple-azure-storage",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Simplified wrapper for Azure Blob Storage operations",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
