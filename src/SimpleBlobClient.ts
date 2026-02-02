@@ -18,7 +18,7 @@ import {
   BlobCredential,
   GetMetadataOptions,
   ListOptions,
-} from './types';
+} from './types.js';
 import {
   BlobNotFoundError,
   BlobUploadError,
@@ -26,12 +26,12 @@ import {
   ConfigurationError,
   parseAzureError,
   parseContainerError,
-} from './errors';
+} from './errors.js';
 import {
   streamToBuffer,
   streamToString,
   getContentTypeFromExtension,
-} from './utils/stream-helpers';
+} from './utils/stream-helpers.js';
 
 const LOCALHOST_HOSTNAMES = new Set([
   'localhost',
@@ -43,6 +43,45 @@ const LOCALHOST_HOSTNAMES = new Set([
 
 function isLocalhostHost(hostname: string): boolean {
   return LOCALHOST_HOSTNAMES.has(hostname);
+}
+
+function isBlobCredential(
+  value: BlobCredential | SimpleBlobClientOptions
+): value is BlobCredential {
+  return 'getToken' in value || 'accountName' in value;
+}
+
+function getValidatedRange(
+  range?: DownloadOptions['range']
+): { offset?: number; count?: number } {
+  if (!range) {
+    return {};
+  }
+
+  const { start, end } = range;
+
+  if (!Number.isInteger(start) || !Number.isInteger(end)) {
+    throw new ConfigurationError(
+      `Invalid range: start (${start}) and end (${end}) must be integers.`
+    );
+  }
+
+  if (start < 0 || end < 0) {
+    throw new ConfigurationError(
+      `Invalid range: start (${start}) and end (${end}) must be >= 0.`
+    );
+  }
+
+  if (end < start) {
+    throw new ConfigurationError(
+      `Invalid range: end (${end}) must be greater than or equal to start (${start}).`
+    );
+  }
+
+  return {
+    offset: start,
+    count: end - start + 1,
+  };
 }
 
 /**
@@ -125,14 +164,14 @@ export class SimpleBlobClient {
     let credential: BlobCredential | undefined;
     if (credentialOrOptions) {
       // Check if it's a credential (TokenCredential has getToken, StorageSharedKeyCredential has accountName)
-      if ('getToken' in credentialOrOptions || 'accountName' in credentialOrOptions) {
+      if (isBlobCredential(credentialOrOptions)) {
         credential = credentialOrOptions as BlobCredential;
         this.options = options || {};
       } else {
         this.options = credentialOrOptions as SimpleBlobClientOptions;
       }
     } else {
-      this.options = {};
+      this.options = options || {};
     }
 
     // Check if it's a connection string (contains AccountName= or UseDevelopmentStorage)
@@ -239,6 +278,7 @@ export class SimpleBlobClient {
    *
    * @throws {BlobNotFoundError} If the blob doesn't exist
    * @throws {BlobDownloadError} If download fails for other reasons
+   * @throws {ConfigurationError} If range options are invalid
    *
    * @example
    * ```typescript
@@ -272,12 +312,10 @@ export class SimpleBlobClient {
         encoding = encodingOrOptions.encoding || 'utf-8';
         options = encodingOrOptions;
       }
+      const range = getValidatedRange(options?.range);
 
       const blobClient = this.getBlobClient(blobName);
-      const downloadResponse = await blobClient.download(
-        options?.range?.start,
-        options?.range ? options.range.end - options.range.start + 1 : undefined
-      );
+      const downloadResponse = await blobClient.download(range.offset, range.count);
 
       if (!downloadResponse.readableStreamBody) {
         throw new BlobDownloadError(
@@ -294,7 +332,11 @@ export class SimpleBlobClient {
         options?.onProgress
       );
     } catch (error) {
-      if (error instanceof BlobDownloadError || error instanceof BlobNotFoundError) {
+      if (
+        error instanceof BlobDownloadError ||
+        error instanceof BlobNotFoundError ||
+        error instanceof ConfigurationError
+      ) {
         throw error;
       }
       throw parseAzureError(error, blobName, this.containerName, 'download');
@@ -310,6 +352,7 @@ export class SimpleBlobClient {
    *
    * @throws {BlobNotFoundError} If the blob doesn't exist
    * @throws {BlobDownloadError} If download fails for other reasons
+   * @throws {ConfigurationError} If range options are invalid
    *
    * @example
    * ```typescript
@@ -321,11 +364,9 @@ export class SimpleBlobClient {
     options?: DownloadOptions
   ): Promise<Buffer> {
     try {
+      const range = getValidatedRange(options?.range);
       const blobClient = this.getBlobClient(blobName);
-      const downloadResponse = await blobClient.download(
-        options?.range?.start,
-        options?.range ? options.range.end - options.range.start + 1 : undefined
-      );
+      const downloadResponse = await blobClient.download(range.offset, range.count);
 
       if (!downloadResponse.readableStreamBody) {
         throw new BlobDownloadError(
@@ -341,7 +382,11 @@ export class SimpleBlobClient {
         options?.onProgress
       );
     } catch (error) {
-      if (error instanceof BlobDownloadError || error instanceof BlobNotFoundError) {
+      if (
+        error instanceof BlobDownloadError ||
+        error instanceof BlobNotFoundError ||
+        error instanceof ConfigurationError
+      ) {
         throw error;
       }
       throw parseAzureError(error, blobName, this.containerName, 'download');
@@ -357,6 +402,7 @@ export class SimpleBlobClient {
    *
    * @throws {BlobNotFoundError} If the blob doesn't exist
    * @throws {BlobDownloadError} If download fails for other reasons
+   * @throws {ConfigurationError} If range options are invalid
    *
    * @example
    * ```typescript
@@ -371,12 +417,10 @@ export class SimpleBlobClient {
     try {
       // Ensure parent directory exists
       await mkdir(dirname(filePath), { recursive: true });
+      const range = getValidatedRange(options?.range);
 
       const blobClient = this.getBlobClient(blobName);
-      const downloadResponse = await blobClient.download(
-        options?.range?.start,
-        options?.range ? options.range.end - options.range.start + 1 : undefined
-      );
+      const downloadResponse = await blobClient.download(range.offset, range.count);
 
       if (!downloadResponse.readableStreamBody) {
         throw new BlobDownloadError(
@@ -407,7 +451,11 @@ export class SimpleBlobClient {
 
       await pipeline(downloadResponse.readableStreamBody, writeStream);
     } catch (error) {
-      if (error instanceof BlobDownloadError || error instanceof BlobNotFoundError) {
+      if (
+        error instanceof BlobDownloadError ||
+        error instanceof BlobNotFoundError ||
+        error instanceof ConfigurationError
+      ) {
         throw error;
       }
       throw parseAzureError(error, blobName, this.containerName, 'download');
@@ -628,6 +676,7 @@ export class SimpleBlobClient {
    * @param options - Upload options including metadata
    *
    * @throws {BlobUploadError} If upload fails
+   * @throws {ConfigurationError} If data cannot be serialized as JSON
    *
    * @example
    * ```typescript
@@ -639,7 +688,21 @@ export class SimpleBlobClient {
     data: unknown,
     options?: UploadOptions
   ): Promise<void> {
-    const content = JSON.stringify(data, null, 2);
+    let content: string;
+    try {
+      const serialized = JSON.stringify(data, null, 2);
+      if (serialized === undefined) {
+        throw new TypeError(
+          'JSON.stringify returned undefined for this payload (for example, undefined, function, or symbol).'
+        );
+      }
+      content = serialized;
+    } catch (error) {
+      throw new ConfigurationError(
+        `Failed to serialize JSON payload before upload: ${(error as Error).message}`
+      );
+    }
+
     await this.uploadFromString(blobName, content, {
       ...options,
       contentType: 'application/json',

@@ -197,6 +197,20 @@ describe('SimpleBlobClient', () => {
 
       expect(client).toBeInstanceOf(SimpleBlobClient);
     });
+
+    it('should support options passed as 4th parameter when 3rd is undefined', async () => {
+      const clientWithFourthParamOptions = new SimpleBlobClient(
+        'DefaultEndpointsProtocol=https;AccountName=test;AccountKey=dGVzdA==;EndpointSuffix=core.windows.net',
+        'my-container',
+        undefined,
+        { createContainerIfNotExists: true }
+      );
+
+      mockCreateIfNotExists.mockResolvedValue({});
+      await clientWithFourthParamOptions.uploadFromString('test.txt', 'content');
+
+      expect(mockCreateIfNotExists).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('downloadAsString', () => {
@@ -283,6 +297,22 @@ describe('SimpleBlobClient', () => {
 
       expect(mockDownload).toHaveBeenCalledWith(0, 7);
     });
+
+    it('should throw ConfigurationError for invalid range where end is smaller than start', async () => {
+      await expect(
+        client.downloadAsString('test.txt', {
+          range: { start: 10, end: 5 },
+        })
+      ).rejects.toThrow(ConfigurationError);
+    });
+
+    it('should throw ConfigurationError for non-integer range values', async () => {
+      await expect(
+        client.downloadAsString('test.txt', {
+          range: { start: 1.2, end: 5 },
+        })
+      ).rejects.toThrow(ConfigurationError);
+    });
   });
 
   describe('downloadAsBuffer', () => {
@@ -309,6 +339,14 @@ describe('SimpleBlobClient', () => {
       });
 
       expect(mockDownload).toHaveBeenCalledWith(0, 7);
+    });
+
+    it('should throw ConfigurationError for negative range values', async () => {
+      await expect(
+        client.downloadAsBuffer('test.bin', {
+          range: { start: -1, end: 6 },
+        })
+      ).rejects.toThrow(ConfigurationError);
     });
   });
 
@@ -472,6 +510,21 @@ describe('SimpleBlobClient', () => {
             blobContentType: 'application/json',
           }),
         })
+      );
+    });
+
+    it('should throw ConfigurationError when JSON serialization fails', async () => {
+      const circular: Record<string, unknown> = {};
+      circular.self = circular;
+
+      await expect(client.uploadJson('invalid.json', circular)).rejects.toThrow(
+        ConfigurationError
+      );
+    });
+
+    it('should throw ConfigurationError for non-serializable top-level values', async () => {
+      await expect(client.uploadJson('invalid.json', undefined)).rejects.toThrow(
+        ConfigurationError
       );
     });
   });

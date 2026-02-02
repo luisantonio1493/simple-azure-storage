@@ -455,7 +455,7 @@ npm run build
 # Run tests
 npm test
 
-# Run integration tests (requires Azurite)
+# Run integration tests (requires Azurite with --skipApiVersionCheck)
 npm run test:integration
 
 # Lint
@@ -477,7 +477,10 @@ Integration tests require Azurite emulator:
 
 ```bash
 # Start Azurite
-docker run -p 10000:10000 mcr.microsoft.com/azure-storage/azurite azurite-blob --blobHost 0.0.0.0
+azurite --silent --skipApiVersionCheck --location ./azurite-data --debug ./azurite-debug.log
+
+# Or with Docker
+docker run -p 10000:10000 mcr.microsoft.com/azure-storage/azurite azurite --skipApiVersionCheck
 
 # Run integration tests
 npm run test:integration

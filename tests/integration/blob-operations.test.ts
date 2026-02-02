@@ -10,10 +10,10 @@ import { readFile, unlink, mkdir } from 'fs/promises';
  *
  * Prerequisites:
  * 1. Install Azurite: npm install -g azurite
- * 2. Start Azurite: azurite --silent --location ./azurite-data --debug ./azurite-debug.log
+ * 2. Start Azurite: azurite --silent --skipApiVersionCheck --location ./azurite-data --debug ./azurite-debug.log
  *
  * Or run with Docker:
- * docker run -p 10000:10000 -p 10001:10001 -p 10002:10002 mcr.microsoft.com/azure-storage/azurite
+ * docker run -p 10000:10000 -p 10001:10001 -p 10002:10002 mcr.microsoft.com/azure-storage/azurite azurite --skipApiVersionCheck
  */
 
 const AZURITE_CONNECTION_STRING = 'UseDevelopmentStorage=true';

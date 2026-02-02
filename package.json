@@ -20,10 +20,10 @@
     "build:types": "tsc -p tsconfig.types.json",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:integration": "vitest run tests/integration",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
     "lint": "eslint src --ext .ts",
     "format": "prettier --write \"src/**/*.ts\"",
-    "prepublishOnly": "npm run build && npm test"
+    "prepublishOnly": "npm run lint && npm test && npm run build"
   },
   "keywords": [
     "azure",

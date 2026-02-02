@@ -1,5 +1,5 @@
 // Main client export
-export { SimpleBlobClient } from './SimpleBlobClient';
+export { SimpleBlobClient } from './SimpleBlobClient.js';
 
 // Types
 export {
@@ -12,7 +12,7 @@ export {
   BlobCredential,
   GetMetadataOptions,
   ListOptions,
-} from './types';
+} from './types.js';
 
 // Errors
 export {
@@ -24,7 +24,7 @@ export {
   BlobDownloadError,
   ContainerOperationError,
   ConfigurationError,
-} from './errors';
+} from './errors.js';
 
 // Utilities (for advanced usage)
 export {
@@ -32,4 +32,4 @@ export {
   streamToString,
   bufferToStream,
   getContentTypeFromExtension,
-} from './utils/stream-helpers';
+} from './utils/stream-helpers.js';

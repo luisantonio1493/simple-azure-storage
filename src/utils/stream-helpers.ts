@@ -1,5 +1,5 @@
 import { Readable } from 'stream';
-import { ProgressEvent } from '../types';
+import { ProgressEvent } from '../types.js';
 
 /**
  * Converts a readable stream to a Buffer

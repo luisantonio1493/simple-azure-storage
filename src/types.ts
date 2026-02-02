@@ -35,7 +35,7 @@ export interface UploadOptions {
 export interface DownloadOptions {
   /** Progress callback for tracking download progress */
   onProgress?: (progress: ProgressEvent) => void;
-  /** Byte range to download (for partial downloads) */
+  /** Byte range to download (inclusive, non-negative integers) */
   range?: { start: number; end: number };
 }
 
