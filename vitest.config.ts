@@ -4,6 +4,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
+    setupFiles: ['tests/setup/node-crypto.ts'],
     include: ['tests/**/*.test.ts'],
     exclude: ['tests/integration/**'],
     coverage: {
